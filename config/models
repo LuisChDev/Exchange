@@ -1,0 +1,89 @@
+-- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
+-- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
+
+-- Users have a name, an email (unique), a password, friends X
+-- Users can subscribe to channels and favorite tags X
+-- Users can have modding rights over a place. Their mod instance can have
+-- different privileges. (going all the way to admin)
+-- Places have an owner, a name, a description
+-- Places have channels
+-- Channels are owned by a Place
+-- Channels have posts and tags
+-- Posts have tags X
+-- Posts have comments X
+
+User json
+    ident Text
+    password Text Maybe
+    UniqueUser ident
+    deriving Typeable Eq Show
+Email json
+    email Text
+    userId UserId Maybe
+    verkey Text Maybe
+    UniqueEmail email
+Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived.
+    message Text
+    postId PostId
+    userId UserId
+    deriving Eq Show
+Post json
+    title Text
+    body Text
+    userId UserId
+    channel ChannelId Maybe
+    deriving Eq Show
+Channel
+    name Text
+    descrp Text
+    placeId PlaceId
+    Primary name
+Place
+    name Text
+    descrp Text
+    userId UserId
+    Primary name
+Tag
+    name Text
+    Primary name
+
+-- --
+-- many to many relationships
+-- --
+
+-- moderators of places
+Mod
+    userId UserId
+    placeId PlaceId
+    Primary userId placeId
+    deriving Eq Show
+-- friends
+UserUser
+    userId UserId
+    friendId UserId
+    Primary userId friendId
+    deriving Eq Show
+-- subscribers
+UserPlace
+    userId UserId
+    placeId PlaceId
+    Primary userId placeId
+    deriving Eq Show
+-- tagged posts
+PostTag
+    postId PostId
+    tagId TagId
+    Primary postId tagId
+    deriving Eq Show
+-- tagged channels
+ChannelTag
+    channelId ChannelId
+    tagId TagId
+    Primary channelId tagId
+    deriving Eq Show
+-- favorited tags
+UserTag
+    userId UserId
+    tagId TagId
+    Primary userId tagId
+    deriving Eq Show
